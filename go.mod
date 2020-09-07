@@ -1,4 +1,4 @@
-module kube-failover-webhook
+module kubevirt-webhook
 
 go 1.13
 

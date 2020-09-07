@@ -10,7 +10,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	wh "kube-failover-webhook/webhook"
+	wh "kubevirt-webhook/webhook"
 
 	"k8s.io/klog"
 )
@@ -21,6 +21,8 @@ func main() {
 	var keyFile string
 
 	flag.IntVar(&port, "port", 8443, "kube-failover webhook server port")
+	flag.IntVar(&wh.CustomNotReadyTolerationSeconds, "customNotReadyTolerationSeconds", 300, "custom NotReady Toleration Seconds")
+	flag.IntVar(&wh.CustomUnreachableTolerationSeconds, "customUnreachableTolerationSeconds", 300, "custom Unreachable Toleration Seconds")
 	flag.StringVar(&certFile, "tlsCertFile", "/etc/webhook/certs/cert.pem", "x509 Certificate file for TLS connection")
 	flag.StringVar(&keyFile, "tlsKeyFile", "/etc/webhook/certs/key.pem", "x509 Private key file for TLS connection")
 	flag.Parse()

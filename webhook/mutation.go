@@ -33,8 +33,6 @@ const (
 	notReadyTolerationsKey    string = "node.kubernetes.io/not-ready"
 	unreachableTolerationsKey string = "node.kubernetes.io/unreachable"
 
-	newTolerationSecondsTemp int64 = 200
-
 	controllerNameSpaceName string = "kubevirt-system"
 )
 
@@ -42,6 +40,9 @@ var (
 	runtimeScheme = runtime.NewScheme()
 	codecs        = serializer.NewCodecFactory(runtimeScheme)
 	deserializer  = codecs.UniversalDeserializer()
+
+	CustomNotReadyTolerationSeconds    int
+	CustomUnreachableTolerationSeconds int
 )
 
 type patchOps struct {
@@ -211,7 +212,7 @@ func getDefaultNotReadyTolerations() corev1.Toleration {
 	defaultNotReadyToleration.Operator = corev1.TolerationOpExists
 	defaultNotReadyToleration.Effect = corev1.TaintEffectNoExecute
 
-	temp := int64(newTolerationSecondsTemp)
+	temp := int64(CustomNotReadyTolerationSeconds)
 	defaultNotReadyToleration.TolerationSeconds = &temp
 
 	return defaultNotReadyToleration
@@ -224,7 +225,7 @@ func getDefaultUnreachableTolerations() corev1.Toleration {
 	defaultUnreachableToleration.Operator = corev1.TolerationOpExists
 	defaultUnreachableToleration.Effect = corev1.TaintEffectNoExecute
 
-	temp := int64(newTolerationSecondsTemp)
+	temp := int64(CustomUnreachableTolerationSeconds)
 	defaultUnreachableToleration.TolerationSeconds = &temp
 
 	return defaultUnreachableToleration

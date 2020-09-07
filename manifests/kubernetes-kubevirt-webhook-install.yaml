@@ -1,33 +1,32 @@
-
 apiVersion: v1
 kind: Service
 metadata:
- name: kube-failover-webhook
+ name: kubevirt-webhook
  namespace: kubevirt-system
  labels:
-    app: kube-failover-webhook
+    app: kubevirt-webhook
 spec:
  ports:
  - name: webhook
     port: 443
     targetPort: 8443
  selector:
-    app: kube-failover-webhook
+    app: kubevirt-webhook
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
- name: kube-failover-webhook
+ name: kubevirt-webhook
  namespace: kubevirt-system
  labels:
-    app: kube-failover-webhook
+    app: kubevirt-webhook
 spec:
  replicas: 1
  template:
     metadata:
-     name: kube-failover-webhook
+     name: kubevirt-webhook
      labels:
-       app: kube-failover-webhook
+       app: kubevirt-webhook
     spec:
       tolerations:
         - key: node-role.kubernetes.io/master
@@ -40,14 +39,16 @@ spec:
               - key: name
                 operator: In
                 values:
-                - kube-failover-webhook
+                - kubevirt-webhook
             topologyKey: kubernetes.io/hostname
     containers:
       - name: webhook
-        image: kube-failover-webhook:latest # make sure to build and tag the image first!
+        image: kubevirt-webhook:latest # make sure to build and tag the image first!
         args:
-         - -tlsCertFile=/etc/webhook/certs/cert.pem
-         - -tlsKeyFile=/etc/webhook/certs/key.pem
+        - -tlsCertFile=/etc/webhook/certs/cert.pem
+        - -tlsKeyFile=/etc/webhook/certs/key.pem
+        - -customNotReadyTolerationSeconds=100
+        - -customUnreachableTolerationSeconds=200
         resources:
           limits:
             memory: 100Mi
@@ -64,22 +65,22 @@ spec:
      volumes:
        - name: webhook-certs
          secret:
-           secretName: kube-failover-webhook-certs
+           secretName: kubevirt-webhook-certs
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: kube-failover-webhook
+  name: kubevirt-webhook
   labels:
-    app: kube-failover-webhook
+    app: kubevirt-webhook
 webhooks:
-- name: network-hook.hypernet-local-agent-system.svc.cluster.local
+- name: kubevirt-webhook.kubevirt-system.svc
   clientConfig:
     service:
-      name: network-hook-svc
+      name: kubevirt-webhook
       namespace: kubevirt-system
       path: "/mutate"
-    caBundle: <CA_BUNDLE>
+    caBundle: ${CA_BUNDLE}
   rules:
   - operations: ["CREATE", "UPDATE"]
     apiGroups: [""]

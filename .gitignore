@@ -1,2 +1,4 @@
 *.sunny
 /temp
+*.exe
+kubevirt-webhook
